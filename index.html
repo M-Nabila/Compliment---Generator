@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kindness Engine | Professional Compliment Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --brand-indigo: #6366F1;
+            --off-white: #F9FAFB;
+            --text-main: #1F2937;
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--off-white);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .compliment-card {
+            background: white;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            transition: var(--transition-smooth);
+        }
+
+        .btn-primary {
+            background-color: var(--brand-indigo);
+            transition: var(--transition-smooth);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.95);
+        }
+
+        .btn-outline {
+            border: 2px solid #E5E7EB;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--brand-indigo);
+            color: var(--brand-indigo);
+        }
+
+        /* Micro-interactions */
+        .fade-in-text {
+            animation: fadeInBlur 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeInBlur {
+            from {
+                opacity: 0;
+                filter: blur(4px);
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                filter: blur(0);
+                transform: translateY(0);
+            }
+        }
+
+        .category-pill {
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .category-pill.active {
+            background-color: var(--brand-indigo);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .success-pop {
+            animation: successScale 0.3s ease-out;
+        }
+
+        @keyframes successScale {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-4 md:p-8">
+
+    <header class="mb-12 text-center max-w-lg">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-3 tracking-tight">Kindness Engine</h1>
+        <p class="text-gray-500 text-lg">A sophisticated way to brighten someone's day.</p>
+    </header>
+
+    <main class="w-full max-w-2xl">
+        <!-- Category Selector -->
+        <section class="flex flex-wrap justify-center gap-3 mb-8" aria-label="Filter compliments by vibe">
+            <button data-category="all" class="category-pill active px-5 py-2 rounded-full border border-gray-200 text-sm font-medium">All Vibes</button>
+            <button data-category="professional" class="category-pill px-5 py-2 rounded-full border border-gray-200 text-sm font-medium">Professional</button>
+            <button data-category="wholesome" class="category-pill px-5 py-2 rounded-full border border-gray-200 text-sm font-medium">Wholesome</button>
+            <button data-category="funny" class="category-pill px-5 py-2 rounded-full border border-gray-200 text-sm font-medium">Funny</button>
+        </section>
+
+        <!-- Main Display Card -->
+        <div class="compliment-card rounded-3xl p-8 md:p-12 text-center relative overflow-hidden">
+            <div id="compliment-display" class="min-h-[160px] flex items-center justify-center" aria-live="polite">
+                <p id="compliment-text" class="text-2xl md:text-3xl font-medium leading-relaxed text-gray-800">
+                    Click the button below to start.
+                </p>
+            </div>
+
+            <!-- Action Suite -->
+            <div class="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button id="generate-btn" class="btn-primary text-white px-8 py-4 rounded-2xl font-semibold text-lg w-full sm:w-auto shadow-lg hover:shadow-indigo-200">
+                    Generate Compliment
+                </button>
+                
+                <div class="flex gap-4 w-full sm:w-auto">
+                    <button id="copy-btn" aria-label="Copy to clipboard" class="btn-outline flex-1 sm:flex-none p-4 rounded-2xl flex items-center justify-center">
+                        <svg id="copy-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        <span id="copy-text" class="sr-only">Copy</span>
+                    </button>
+                    
+                    <button id="share-btn" aria-label="Share via system" class="btn-outline flex-1 sm:flex-none p-4 rounded-2xl flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+                        <span class="sr-only">Share</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="mt-auto py-8 text-gray-400 text-sm">
+        <p>© 2024 Digital Wellness Suite. Stay kind.</p>
+    </footer>
+
+    <!-- Toast Notification Container -->
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full opacity-0 pointer-events-none transition-opacity duration-300 shadow-2xl">
+        Copied to clipboard!
+    </div>
+
+    <script>
+        const compliments = [
+            { id: 1, text: "Your ability to solve complex problems with such ease is truly impressive.", category: "professional" },
+            { id: 2, text: "You have a natural ability to bring out the best in everyone around you.", category: "professional" },
+            { id: 3, text: "The way you articulate your thoughts is both clear and inspiring.", category: "professional" },
+            { id: 4, text: "Your attention to detail is a rare and valuable asset.", category: "professional" },
+            { id: 5, text: "The world is a much better place because you're in it.", category: "wholesome" },
+            { id: 6, text: "You have a heart of gold and a spirit that radiates kindness.", category: "wholesome" },
+            { id: 7, text: "Someone out there is smiling right now just because they met you.", category: "wholesome" },
+            { id: 8, text: "Your perspective is refreshing and deeply valued.", category: "wholesome" },
+            { id: 9, text: "You're like the 'skip ad' button on YouTube. Everyone loves you.", category: "funny" },
+            { id: 10, text: "If you were a vegetable, you'd be a 'cute-cumber'.", category: "funny" },
+            { id: 11, text: "I'd share my last slice of pizza with you, and that's saying a lot.", category: "funny" },
+            { id: 12, text: "You're smarter than Google and cooler than a penguin in a tuxedo.", category: "funny" }
+        ];
+
+        let currentCategory = 'all';
+        let lastComplimentId = null;
+
+        /**
+         * STREAMING_CHUNK:Defining core utility functions...
+         */
+        const init = () => {
+            setupEventListeners();
+            // Optional: Start with a random compliment
+            generateCompliment();
+        };
+
+        const setupEventListeners = () => {
+            document.getElementById('generate-btn').addEventListener('click', generateCompliment);
+            document.getElementById('copy-btn').addEventListener('click', handleCopy);
+            document.getElementById('share-btn').addEventListener('click', handleShare);
+
+            // Category filtering
+            document.querySelectorAll('.category-pill').forEach(pill => {
+                pill.addEventListener('click', (e) => {
+                    updateActiveCategory(e.target);
+                });
+            });
+        };
+
+        const updateActiveCategory = (target) => {
+            document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
+            target.classList.add('active');
+            currentCategory = target.dataset.category;
+        };
+
+        /**
+         * Logic to pick a random compliment avoiding immediate repeats
+         */
+        const generateCompliment = () => {
+            const filtered = currentCategory === 'all' 
+                ? compliments 
+                : compliments.filter(c => c.category === currentCategory);
+
+            // Prevent showing the same one twice in a row if possible
+            let pool = filtered.length > 1 
+                ? filtered.filter(c => c.id !== lastComplimentId) 
+                : filtered;
+
+            const randomIndex = Math.floor(Math.random() * pool.length);
+            const selected = pool[randomIndex];
+            
+            lastComplimentId = selected.id;
+            renderCompliment(selected.text);
+        };
+
+        /**
+         * Updates the DOM with a transition effect
+         */
+        const renderCompliment = (text) => {
+            const display = document.getElementById('compliment-text');
+            
+            // Re-trigger animation
+            display.classList.remove('fade-in-text');
+            void display.offsetWidth; // Trigger reflow
+            
+            display.textContent = text;
+            display.classList.add('fade-in-text');
+        };
+
+        /**
+         * STREAMING_CHUNK:Implementing Output Suite (Copy/Share)...
+         */
+        const handleCopy = async () => {
+            const text = document.getElementById('compliment-text').innerText;
+            const btn = document.getElementById('copy-btn');
+            
+            try {
+                // Using fallback mechanism for clipboard as suggested
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+
+                showFeedback('Copied!');
+                btn.classList.add('success-pop', 'bg-green-50', 'border-green-200');
+                setTimeout(() => {
+                    btn.classList.remove('success-pop', 'bg-green-50', 'border-green-200');
+                }, 1000);
+            } catch (err) {
+                console.error('Copy failed', err);
+            }
+        };
+
+        const handleShare = async () => {
+            const text = document.getElementById('compliment-text').innerText;
+            
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'A Compliment for You',
+                        text: `${text} - Generated by Kindness Engine`,
+                        url: window.location.href
+                    });
+                } catch (err) {
+                    console.log('Share cancelled or failed');
+                }
+            } else {
+                showFeedback('Sharing not supported on this device');
+            }
+        };
+
+        const showFeedback = (message) => {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 2500);
+        };
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
